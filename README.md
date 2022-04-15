@@ -4,19 +4,27 @@
 
 
 
-### Look at the following smart contract and my comments regarding the tricks in each steps:
+I explain some trick to reduce gas consumotions in your solidity smart contracts by example.
+
+The tricks as the followings:
+- Using calldata
+- Short-circuiting 
+- Loop increment
+- Loading local state variables into local variable (memory)
+- Loading array slots into memory
+
+
+Look the GasOptmized contract and my comments in the code:
+
 
 ```
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-contract GasOptimize{
-
-
+contract GasOptimized{
 
     uint public sum;
 
-/*
     function Is_Even(uint[] memory numbers) external {
         for(uint i=0; i< numbers.length; i+=1){
             bool isEven=numbers[i] % 2 ==0;
@@ -27,7 +35,6 @@ contract GasOptimize{
         }
 
     }
-    */
    ````
    
   Now look at the transaction cost --> 50970 before the gas optimization
@@ -36,7 +43,7 @@ contract GasOptimize{
 
    
   ```
-     function Is_Even(uint[] calldata numbers) external {
+     function Is_Even(uint[] calldata numbers) external { // calldata
         for(uint i=0; i< numbers.length; i+=1){
             bool isEven=numbers[i] % 2 ==0;
             bool isLess99 = numbers[i] < 99;
@@ -57,11 +64,11 @@ contract GasOptimize{
      
   ```
         function Is_Even(uint[] calldata numbers) external {
-            //load the local state into the memory
+           
             uint _sum=sum;
             for(uint i=0; i< numbers.length; i+=1){
-               // bool isEven=numbers[i] % 2 ==0;   
-               // bool isLess99 = numbers[i] < 99;
+               // bool isEven=numbers[i] % 2 ==0;    --> short circuiting
+               // bool isLess99 = numbers[i] < 99;   --> short circuiting
                if(numbers[i] % 2 ==0 && numbers[i] < 99){
                    _sum+=numbers[i];
                }
@@ -72,17 +79,14 @@ contract GasOptimize{
        
   ```
   
-     Now after the short-circuiting optimization we got the transaction cost 48612
-     
-    
-    
-    ### loop increment trick
+ Now after the short-circuiting optimization we got the transaction cost 48612
+
+    ### Loop increment trick
 
 
     
     ```
         function Is_Even(uint[] calldata numbers) external {
-            //load the local state into the memory
             uint _sum=sum;
             for(uint i=0; i< numbers.length; ++i){ // --> loop increment
                // bool isEven=numbers[i] % 2 ==0;
@@ -99,23 +103,23 @@ contract GasOptimize{
    
    Now the transaction cost is 48222 
    
-   ### Loading the local state into memory
+   ### Loading local state variables into local variable (memory)
 
 
 ```
 
    function Is_Even(uint[] calldata numbers) external {
-            //load the local state into the memory
-            uint _sum=sum;
+            uint _sum=sum; //  < -- check here
             uint _len=numbers.length;
-            for(uint i=0; i< _len; ++i){ // --> loop increment
+            for(uint i=0; i< _len; ++i){ 
+            
                // bool isEven=numbers[i] % 2 ==0;
                // bool isLess99 = numbers[i] < 99;
                if(numbers[i] % 2 ==0 && numbers[i] < 99){
                    _sum+=numbers[i];
                }
             }
-            sum=_sum;
+            sum=_sum; // and here <---
     
         }
   
@@ -125,7 +129,7 @@ contract GasOptimize{
  Now the transaction cost is --> 48187 
 
 
-### Loading the array slot into memory
+### Loading array slots into memory
 
     
  ```
@@ -149,4 +153,5 @@ contract GasOptimize{
 
 Now the transaction cost is -->  48025 
            
+       
 

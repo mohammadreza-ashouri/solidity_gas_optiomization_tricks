@@ -53,14 +53,12 @@ contract GasOptimized{
         }
 
     }
+      ```
     
-    ```
-    
-    
-    Now if you compile and deploy the contract and execute the Is_even function the transaction cost is 49141 gas
-    
-    ### Short-circuiting trick!
-
+ Now if you compile and deploy the contract and execute the Is_even function the transaction cost is 49141 gas
+ 
+   
+   ### Short-circuiting trick!
      
   ```
         function Is_Even(uint[] calldata numbers) external {
@@ -81,7 +79,7 @@ contract GasOptimized{
   
  Now after the short-circuiting optimization we got the transaction cost 48612
 
-    ### Loop increment trick
+ ### Loop increment trick
 
 
     
